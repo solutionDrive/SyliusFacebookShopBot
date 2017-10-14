@@ -40,9 +40,9 @@ class DefaultController extends Controller
     public function receiveAction(Request $request)
     {
         $logger = $this->get('logger');
+        $logger->error(var_export($request->getContent(), true));
         $productService = $this->get('api.taxonsproducts');
         $products = $productService->fetchItems('mugs');
-        $logger->error(var_export($products, true));
 
         return $this->json([
 
