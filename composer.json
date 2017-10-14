@@ -14,7 +14,8 @@
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/",
-            "ApiBundle\\": "src/ApiBundle/"
+            "ApiBundle\\": "src/ApiBundle/",
+            "SyliusConnection\\": "src/SyliusConnectionBundle/"
         },
         "files": [
             "vendor/symfony/symfony/src/Symfony/Component/VarDumper/Resources/functions/dump.php"

@@ -1,0 +1,3 @@
+sylius-homepage:
+  path: /hacktaxons
+  defaults: { _controller: SyliusConnectionBundle:Default:index }
