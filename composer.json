@@ -14,7 +14,8 @@
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/",
-            "ApiBundle\\": "src/ApiBundle/"
+            "ApiBundle\\": "src/ApiBundle/",
+            "SyliusConnection\\": "src/SyliusConnectionBundle/"
         },
         "files": [
             "vendor/symfony/symfony/src/Symfony/Component/VarDumper/Resources/functions/dump.php"
@@ -24,6 +25,7 @@
         "php": ">=5.5.9",
         "doctrine/doctrine-bundle": "^1.6",
         "doctrine/orm": "^2.5",
+        "guzzlehttp/guzzle": "^6.3",
         "incenteev/composer-parameter-handler": "^2.0",
         "sensio/distribution-bundle": "^5.0.19",
         "sensio/framework-extra-bundle": "^3.0.2",
