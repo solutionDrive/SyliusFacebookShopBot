@@ -1,3 +1,8 @@
 api_homepage:
     path:     /api
     defaults: { _controller: ApiBundle:Default:index }
+    methods: GET
+api_message:
+    path:     /api
+    defaults: { _controller: ApiBundle:Default:receive }
+    methods: POST
