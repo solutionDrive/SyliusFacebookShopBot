@@ -6,7 +6,6 @@ use ApiBundle\Models\Entry;
 use ApiBundle\Models\FacebookResponse;
 use ApiBundle\Models\Messaging;
 use ApiBundle\Models\User;
-use AppBundle\Service\TaxonsProductsService;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Monolog\Logger;
@@ -39,13 +38,30 @@ class DefaultController extends Controller
      */
     public function receiveAction(Request $request)
     {
-        $logger = $this->get('logger');
-        $logger->error(var_export($request->getContent(), true));
-        $productService = $this->get('api.taxonsproducts');
-        $products = $productService->fetchItems('mugs');
+        $oRequest = $request->getContent();
+        $aRequest = json_decode($oRequest);
+        $oResponse = $this->_setRequest($aRequest);
+        return $this->json($oResponse->getArray());
+    }
 
-        return $this->json([
-
-        ]);
+    /**
+     * @param $aRequest
+     */
+    protected function _setRequest($aRequest)
+    {
+        $oFacebookResponse = new FacebookResponse();
+        $oEntry = new Entry();
+        $oMessaging = new Messaging();
+        $oSender = new User();
+        $oFacebookResponse->setObject($aRequest['object']);
+        $oFacebookResponse->setEntry($aRequest['entry']);
+        $oEntry->setId($aRequest['entry']['id']);
+        $oEntry->setTime($aRequest['entry']['time']);
+        $oEntry->setMessaging($aRequest['entry']['messaging']);
+        $oSender->setId($aRequest['entry']['messaging']['recipient']['id']);
+        $oMessaging->setSender($oSender);
+        $oSender->setId($aRequest['entry']['messaging']['sender']['id']);
+        $oMessaging->setSender($oSender);
+        return $oFacebookResponse;
     }
 }

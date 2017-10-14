@@ -66,7 +66,8 @@ class FacebookResponse
                     ],
                     'recipient' => [
                         'id' => $this->getEntry()->getMessaging()->getRecipient()->getId()
-                    ]
+                    ],
+                    'text' => $this->getEntry()->getMessaging()->getMessage()
                 ]
             ]
         ];
