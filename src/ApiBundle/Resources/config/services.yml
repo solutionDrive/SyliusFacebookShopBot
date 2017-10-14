@@ -1,7 +1,7 @@
 services:
     api.taxonsproducts:
         class: ApiBundle\Services\TaxonsProductsService
-        arguments: ["api.client"]
+        arguments: ["@api.client"]
     api.client:
         class: ApiBundle\Services\ClientService
         arguments: []
