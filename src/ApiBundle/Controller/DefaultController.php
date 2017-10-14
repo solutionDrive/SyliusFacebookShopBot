@@ -17,9 +17,9 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
-        $mode = $request->get('hub.mode');
-        $challenge = $request->get('hub.challenge');
-        $token = $request->get('hub.verify_token');
+        $mode = $request->get('hub_mode');
+        $challenge = $request->get('hub_challenge');
+        $token = $request->get('hub_verify_token');
 
         if ($mode === 'subscribe' && $token === "SyliusHackerton") {
             return $this->json(['success' => false]);
