@@ -6,7 +6,7 @@
  * Time: 14:37
  */
 
-namespace AppBundle\Service;
+namespace ApiBundle\Services;
 
 
 use GuzzleHttp\ClientInterface;

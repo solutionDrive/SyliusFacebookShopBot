@@ -1,4 +1,7 @@
 services:
-#    api.example:
-#        class: ApiBundle\Example
-#        arguments: ["@service_id", "plain_value", "%parameter%"]
+    api.taxonsProducts:
+        class: ApiBundle\Services\TaxonsProductsService
+        arguments: ["api.client"]
+    api.client:
+        class: ApiBundle\Services\ClientService
+        arguments: []

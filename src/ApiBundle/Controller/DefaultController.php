@@ -6,7 +6,12 @@ use ApiBundle\Models\Entry;
 use ApiBundle\Models\FacebookResponse;
 use ApiBundle\Models\Messaging;
 use ApiBundle\Models\User;
+use AppBundle\Service\TaxonsProductsService;
+use GuzzleHttp\Client;
+use Psr\Log\LoggerInterface;
+use Symfony\Bridge\Monolog\Logger;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use \Doctrine\Common\Util\Debug;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -14,6 +19,7 @@ class DefaultController extends Controller
 {
     /**
      * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\JsonResponse|Response
      */
     public function indexAction(Request $request)
     {
@@ -21,11 +27,11 @@ class DefaultController extends Controller
         $challenge = $request->get('hub_challenge');
         $token = $request->get('hub_verify_token');
 
-        if ($mode === 'subscribe' && $token === "SyliusHackerton") {
+        if ($mode !== 'subscribe' && $token !== "SyliusHackerton") {
             return $this->json(['success' => false]);
         }
 
-        return new Response("value=$challenge", 200);
+        return new Response("$challenge", 200);
     }
 
     /**
@@ -33,7 +39,13 @@ class DefaultController extends Controller
      */
     public function receiveAction(Request $request)
     {
-        // @todo parse this shit
-        return $this->json([]);
+        $logger = $this->get('logger');
+        $productService = $this->get('api.taxonsProducts');
+        $products = $productService->fetchItems('mugs');
+        $logger->error(var_export($products, true));
+        
+        return $this->json([
+
+        ]);
     }
 }
