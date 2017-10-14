@@ -7,30 +7,33 @@ use ApiBundle\Models\FacebookResponse;
 use ApiBundle\Models\Messaging;
 use ApiBundle\Models\User;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class DefaultController extends Controller
 {
-    public function indexAction()
+    /**
+     * @param Request $request
+     */
+    public function indexAction(Request $request)
     {
-        $recipient = new User();
-        $recipient->setId('123');
+        $mode = $request->get('hub.mode');
+        $challenge = $request->get('hub.challenge');
+        $token = $request->get('hub.verify_token');
 
-        $sender = new User();
-        $sender->setId('1234');
+        if ($mode === 'subscribe' && $token === "SyliusHackerton") {
+            return $this->json(['success' => false]);
+        }
 
-        $messaging = new Messaging();
-        $messaging->setRecipient($recipient);
-        $messaging->setSender($sender);
+        return new Response("value=$challenge", 200);
+    }
 
-        $entry = new Entry();
-        $entry->setId('125407384752995');
-        $entry->setTime(time());
-        $entry->setMessaging($messaging);
-
-        $response = new FacebookResponse();
-        $response->setEntry($entry);
-        $response->setObject('page');
-
-        return $this->json($response->getArray());
+    /**
+     * @param Request $request
+     */
+    public function receiveAction(Request $request)
+    {
+        // @todo parse this shit
+        return $this->json([]);
     }
 }
