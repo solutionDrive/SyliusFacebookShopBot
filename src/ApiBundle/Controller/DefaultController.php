@@ -7,10 +7,12 @@ use ApiBundle\Models\FacebookResponse;
 use ApiBundle\Models\Messaging;
 use ApiBundle\Models\User;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Monolog\Logger;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use \Doctrine\Common\Util\Debug;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -42,7 +44,7 @@ class DefaultController extends Controller
         $oRequest = $request->getContent();
         $aRequest = json_decode($oRequest, true);
         $logger = $this->get('logger');
-        $logger->info(var_export($request->getContent(), true));
+        $logger->error(var_export($request->getContent(), true));
         $this->sendMessage($aRequest);
 
         return $this->json([]);
@@ -71,17 +73,28 @@ class DefaultController extends Controller
         } catch (\Exception $exception) {
             $aProducts = [];
         }
+        $logger->error(var_export($aProducts, true));
 
-        $logger->info(var_export($aProducts, true));
-        foreach ($aProducts as $item) {
-            $pageMessage .= $item['name'] . PHP_EOL;
-        }
-
-        if ($pageMessage === "") {
+        if (empty($aProducts)) {
             $pageMessage = "i did not found any " . $userMessage;
+            $facebook->sendMessage($pageMessage, $receiverId, $senderId);
+            return;
         }
 
-        $facebook->sendMessage($pageMessage, $receiverId, $senderId);
-
+        $iMaxProducts = 4;
+        $iCounter = 0;
+        foreach ($aProducts as $key => $item) {
+            if ($iCounter >= $iMaxProducts) {
+                break;
+            }
+            $iCounter++;
+            try {
+                $facebook->sendMessage($item['name'], $receiverId, $senderId);
+                $facebook->sendAttachment($item['image'], $receiverId, $senderId);
+                sleep(0.1);
+            } catch (ClientException $exception) {
+                continue;
+            }
+        }
     }
 }

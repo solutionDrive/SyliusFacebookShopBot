@@ -21,6 +21,27 @@ class Messaging
     /** @var  string */
     protected $message;
 
+    /** @var  string */
+    protected $attachment;
+
+    /**
+     * @return string
+     */
+    public function getAttachment()
+    {
+        return $this->attachment;
+    }
+
+    /**
+     * @param string $attachment
+     * @return Messaging
+     */
+    public function setAttachment($attachment)
+    {
+        $this->attachment = $attachment;
+        return $this;
+    }
+
     /**
      * @return User
      */
@@ -77,16 +98,22 @@ class Messaging
 
     public function getArray()
     {
-        return [
+        $aBase = [
             'sender' => [
                 'id' => $this->getSender()->getId()
             ],
             'recipient' => [
                 'id' => $this->getRecipient()->getId()
-            ],
-            'message' => [
-                'text' => $this->getMessage()
             ]
         ];
+
+        if ($this->getAttachment() !== null) {
+            $aBase['message']['attachment']['type'] = 'image';
+            $aBase['message']['attachment']['payload']['url'] = $this->getAttachment();
+        } else {
+            $aBase['message']['text'] = $this->getMessage();
+        }
+
+        return $aBase;
     }
 }
