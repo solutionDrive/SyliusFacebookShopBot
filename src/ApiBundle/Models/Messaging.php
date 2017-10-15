@@ -18,6 +18,9 @@ class Messaging
     /** @var  User */
     protected $recipient;
 
+    /** @var  string */
+    protected $message;
+
     /**
      * @return User
      */
@@ -52,5 +55,38 @@ class Messaging
     {
         $this->recipient = $recipient;
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMessage()
+    {
+        return $this->message;
+    }
+
+    /**
+     * @param string $message
+     * @return Messaging
+     */
+    public function setMessage($message)
+    {
+        $this->message = $message;
+        return $this;
+    }
+
+    public function getArray()
+    {
+        return [
+            'sender' => [
+                'id' => $this->getSender()->getId()
+            ],
+            'recipient' => [
+                'id' => $this->getRecipient()->getId()
+            ],
+            'message' => [
+                'text' => $this->getMessage()
+            ]
+        ];
     }
 }

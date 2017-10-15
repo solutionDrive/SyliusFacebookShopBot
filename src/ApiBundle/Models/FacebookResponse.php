@@ -57,18 +57,19 @@ class FacebookResponse
     {
         return [
             'object' => $this->getObject(),
-            'entry' => [
+            'entry' => [[
                 'id' => $this->getEntry()->getId(),
                 'time' => $this->getEntry()->getTime(),
-                'messaging' => [
+                'messaging' => [[
                     'sender' => [
                         'id' => $this->getEntry()->getMessaging()->getSender()->getId()
                     ],
                     'recipient' => [
                         'id' => $this->getEntry()->getMessaging()->getRecipient()->getId()
-                    ]
-                ]
-            ]
+                    ],
+                    'text' => $this->getEntry()->getMessaging()->getMessage()
+                ]]
+            ]]
         ];
     }
 }
