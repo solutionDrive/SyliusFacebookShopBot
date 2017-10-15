@@ -7,10 +7,12 @@ use ApiBundle\Models\FacebookResponse;
 use ApiBundle\Models\Messaging;
 use ApiBundle\Models\User;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Monolog\Logger;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use \Doctrine\Common\Util\Debug;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -50,28 +52,49 @@ class DefaultController extends Controller
 
     /**
      * @param $aRequest
+     * @todo fix that shitty mess x)
      */
     protected function sendMessage($aRequest)
     {
-        $oMessaging = new Messaging();
-        $oSender = new User();
-        $oReceiver = new User();
+        $logger = $this->get('logger');
+        $pageMessage = "";
+        $shop = $this->get('api.taxonsproducts');
+        $facebook = $this->get('api.facebook');
+        $senderId = $aRequest['entry'][0]['messaging'][0]['sender']['id'];
+        $receiverId = $aRequest['entry'][0]['messaging'][0]['recipient']['id'];
+        $userMessage = $aRequest['entry'][0]['messaging'][0]['message']['text'];
 
-        if ($aRequest['entry'][0]['messaging'][0]['sender']['id'] === self::PAGE_ID) {
+        if ($senderId === self::PAGE_ID) {
             return;
         }
 
-        $oSender->setId($aRequest['entry'][0]['messaging'][0]['recipient']['id']);
-        $oMessaging->setSender($oSender);
-        $oReceiver->setId($aRequest['entry'][0]['messaging'][0]['sender']['id']);
-        $oMessaging->setRecipient($oReceiver);
-        $oMessaging->setMessage('hallo');
+        try {
+            $aProducts = $shop->fetchItems($userMessage);
+        } catch (\Exception $exception) {
+            $aProducts = [];
+        }
+        $logger->error(var_export($aProducts, true));
 
-        $oGuzzle = $this->get('api.client');
-        $oGuzzle->request('POST', 'https://graph.facebook.com/v2.6/me/messages?access_token=EAAXTdOc8KwIBAHFaOa6PKT5ad1jEatXgPS2TffgfNSjUZBqyFSNpBlcwmU5MbZCUduZAtuqH9R3dGkKJQmYDNEaW37FZAZBzm4MHYi1ZAZBL8yuEW7teq6u9l0uHWa1DtyyFJep9DgNNwY0wu3aKNj2MKeGSnOyn0ZCHepRixMl4J0ktQSnODUIcLDvymZATEyToZD',
-            [
-                'json' => $oMessaging->getArray()
-            ]
-        );
+        if (empty($aProducts)) {
+            $pageMessage = "i did not found any " . $userMessage;
+            $facebook->sendMessage($pageMessage, $receiverId, $senderId);
+            return;
+        }
+
+        $iMaxProducts = 4;
+        $iCounter = 0;
+        foreach ($aProducts as $key => $item) {
+            if ($iCounter >= $iMaxProducts) {
+                break;
+            }
+            $iCounter++;
+            try {
+                $facebook->sendMessage($item['name'], $receiverId, $senderId);
+                $facebook->sendAttachment($item['image'], $receiverId, $senderId);
+                sleep(0.1);
+            } catch (ClientException $exception) {
+                continue;
+            }
+        }
     }
 }
