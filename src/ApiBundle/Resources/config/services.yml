@@ -5,3 +5,6 @@ services:
     api.client:
         class: ApiBundle\Services\ClientService
         arguments: []
+    api.facebook:
+        class: ApiBundle\Services\FacebookService
+        arguments: ['@api.client']
