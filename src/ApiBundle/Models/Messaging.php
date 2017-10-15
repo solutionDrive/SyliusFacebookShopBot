@@ -74,4 +74,19 @@ class Messaging
         $this->message = $message;
         return $this;
     }
+
+    public function getArray()
+    {
+        return [
+            'sender' => [
+                'id' => $this->getSender()->getId()
+            ],
+            'recipient' => [
+                'id' => $this->getRecipient()->getId()
+            ],
+            'message' => [
+                'text' => $this->getMessage()
+            ]
+        ];
+    }
 }

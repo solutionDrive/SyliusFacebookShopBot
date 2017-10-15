@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class DefaultController extends Controller
 {
+    const PAGE_ID = "125407384752995";
     /**
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\JsonResponse|Response
@@ -39,29 +40,38 @@ class DefaultController extends Controller
     public function receiveAction(Request $request)
     {
         $oRequest = $request->getContent();
-        $aRequest = json_decode($oRequest);
-        $oResponse = $this->_setRequest($aRequest);
-        return $this->json($oResponse->getArray());
+        $aRequest = json_decode($oRequest, true);
+        $logger = $this->get('logger');
+        $logger->error(var_export($request->getContent(), true));
+        $this->sendMessage($aRequest);
+
+        return $this->json([]);
     }
 
     /**
      * @param $aRequest
      */
-    protected function _setRequest($aRequest)
+    protected function sendMessage($aRequest)
     {
-        $oFacebookResponse = new FacebookResponse();
-        $oEntry = new Entry();
         $oMessaging = new Messaging();
         $oSender = new User();
-        $oFacebookResponse->setObject($aRequest['object']);
-        $oFacebookResponse->setEntry($aRequest['entry']);
-        $oEntry->setId($aRequest['entry']['id']);
-        $oEntry->setTime($aRequest['entry']['time']);
-        $oEntry->setMessaging($aRequest['entry']['messaging']);
-        $oSender->setId($aRequest['entry']['messaging']['recipient']['id']);
+        $oReceiver = new User();
+
+        if ($aRequest['entry'][0]['messaging'][0]['sender']['id'] === self::PAGE_ID) {
+            return;
+        }
+
+        $oSender->setId($aRequest['entry'][0]['messaging'][0]['recipient']['id']);
         $oMessaging->setSender($oSender);
-        $oSender->setId($aRequest['entry']['messaging']['sender']['id']);
-        $oMessaging->setSender($oSender);
-        return $oFacebookResponse;
+        $oReceiver->setId($aRequest['entry'][0]['messaging'][0]['sender']['id']);
+        $oMessaging->setRecipient($oReceiver);
+        $oMessaging->setMessage('hallo');
+
+        $oGuzzle = $this->get('api.client');
+        $oGuzzle->request('POST', 'https://graph.facebook.com/v2.6/me/messages?access_token=EAAXTdOc8KwIBAHFaOa6PKT5ad1jEatXgPS2TffgfNSjUZBqyFSNpBlcwmU5MbZCUduZAtuqH9R3dGkKJQmYDNEaW37FZAZBzm4MHYi1ZAZBL8yuEW7teq6u9l0uHWa1DtyyFJep9DgNNwY0wu3aKNj2MKeGSnOyn0ZCHepRixMl4J0ktQSnODUIcLDvymZATEyToZD',
+            [
+                'json' => $oMessaging->getArray()
+            ]
+        );
     }
 }
